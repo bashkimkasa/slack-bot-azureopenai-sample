@@ -13,7 +13,7 @@ This is a simple app to demonstrate the functionality. It has minimal exception 
 ## Prerequisites
 Please make sure that you have already created in Azure the following resources:
 1. A storage account, with blob container and data files that will be used for RAG
-1. An Azure OpenAI service/resources
+1. An Azure OpenAI service/resource
     1. Deploy a model for LLM (example: `gpt-35-turbo-16k`)
     2. Deploy a model for text-embedding (example: `text-embedding-ada-002`)
 2. An Azure (AI) Search service/resource
