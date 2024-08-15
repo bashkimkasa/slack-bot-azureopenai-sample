@@ -56,7 +56,7 @@ Setup a virtual environment (optional)
 python -m venv .venv
 ```
 
-Active the virtual environment (optional)
+Activate the virtual environment (optional)
 ```sh
 # For Linux:
 source .venv/bin/activate
