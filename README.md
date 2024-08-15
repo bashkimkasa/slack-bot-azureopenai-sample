@@ -10,33 +10,44 @@ When a post from a new user in the the thread is entered that thread is consider
 This is a simple app to demonstrate the functionality. It has minimal exception handling and support cases.
 
 
+## Prerequisites
+Please make sure that you have already created in Azure the following resources:
+1. A storage account, with blob container and data files that will be used for RAG
+1. An Azure OpenAI service/resources
+    1. Deploy a model for LLM (example: `gpt-35-turbo-16k`)
+    2. Deploy a model for text-embedding (example: `text-embedding-ada-002`)
+2. An Azure (AI) Search service/resource
+    1. Import and vectorize your data from above
+
+
 ## App Settings And Configuration 
 Please create a [`slack app`](https://api.slack/com/apps) and do the following:
 1. Go to `OAuth & Permissions`
-  1. Go to `Scopes` section and add the `chat:write` scope to it
-  2. Get the Bot User OAuth Token store somewhere for later use.
-  3. At this point you can re-install the app to the workspace (but it will be done later anyway when additional scopes are added from the `Event Subscriptions`)
+    1. Go to `Scopes` section and add the `chat:write` scope to it
+    2. Get the Bot User OAuth Token store somewhere for later use.
+    3. At this point you can re-install the app to the workspace (but it will be done later anyway when additional scopes are added from the `Event Subscriptions`)
 
 2. For local Development, go to `Socket Mode` and enable it.
-   1. When enablig `Socket Mode`, you will get an app level token which you can give it some name to your liking.
-   2. Store the app level token somewhere for later use.
-   3. Leave the default app level scope as is (`connections:write`)
+    1. When enablig `Socket Mode`, you will get an app level token which you can give it some name to your liking.
+    2. Store the app level token somewhere for later use.
+    3. Leave the default app level scope as is (`connections:write`)
 
 3. Go to `Event Subscriptions` for subscribing to specific events
-  1. First turn on `Enable Events`
-  2. When using `Socket Mode` (for development) above you do not need to provide a Request URL, but for production you'll need to provide the Request URL where slack will be sending the events to.
-  3. In `Subscribe to bot events` subscribe to the following events:
+    1. First turn on `Enable Events`
+    2. When using `Socket Mode` (for development) above you do not need to provide a Request URL, but for production you'll need to provide the Request URL where slack will be sending the events to.
+
+4. In `Subscribe to bot events` subscribe to the following events:
     1. `message.channels` -> A message was posted to a channel (publich) that the bot is invited in.
     2. `message.groups`   -> A message was posted to a private channel that the bot is invited in.
     3. You can add additinal optional events if needed (like message:im) for direct message with the bot.
     3. Save changes.
 
-4. At this point you should see a warning on the top of your screen indicating to re-install the app in your workspace in order for the changes to take affect. Please go ahead and re-install the app and in the subsequent screen Allow (authorize) the new scopes.
+5. At this point you should see a warning on the top of your screen indicating to re-install the app in your workspace in order for the changes to take affect. Please go ahead and re-install the app and in the subsequent screen Allow (authorize) the new scopes.
 
-5. Go to `App Home`
-  1. Turn on the feature `Always Show My Bot as Online`
-  2. If you want to change the name you can do so in the section `Your App's Presense in Slack`
-  3. In the `Show Tabs` section check the box that says `Allow users to send Slash commands and messages from the messages tab`. (this setting may take a couple of minutes to propagate to slack)
+6. Go to `App Home`
+    1. Turn on the feature `Always Show My Bot as Online`
+    2. If you want to change the name you can do so in the section `Your App's Presense in Slack`
+    3. In the `Show Tabs` section check the box that says `Allow users to send Slash commands and messages from the messages tab`. (this setting may take a couple of minutes to propagate to slack)
 
 
 ## Getting started
