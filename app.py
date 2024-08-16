@@ -100,6 +100,12 @@ def parse_azure_openai_response(azure_openai_response):
     return response_message
 
 
+# Function to ignore messages toward any specific user
+def ignore_message(message):
+    if any(element["type"] == "user" for block in message.get("blocks", []) for element in block.get("elements", []) for element in element.get("elements", [])):
+        return True
+    return False
+
 # Function to fetch all messages in a thread given the channel and thread_ts
 def get_thread_messages(channel, thread_ts):
     # Get all messages in the thread
@@ -119,6 +125,9 @@ def add_history_to_messages(incoming_message, messages, thread_messages):
     for thread_message in thread_messages:
         if thread_message.get("bot_id", None) is not None:
             messages.append({"role": "assistant", "content": thread_message["text"]})
+        # Exlude messages toward any specific user
+        elif ignore_message(thread_message):
+            continue
         # If the message from the thread is same as incoming message (or another user), skip it
         elif incoming_message["ts"] != thread_message["ts"] and incoming_message["user"] == thread_messages[0]["user"]:
             messages.append({"role": "user", "content": thread_message["text"]}) 
@@ -131,6 +140,9 @@ app = App(
 # Listens to incoming messages from channels the app is installed in
 @app.message("")
 def message_handler(message, say, logger):
+    logger.debug(json.dumps(message, indent=2))
+    if ignore_message(message):
+        return
     # Initialize the messages list for the conversation query with the system message
     messages = [{
         "role": "system",
@@ -138,7 +150,6 @@ def message_handler(message, say, logger):
                     "Do not provide information or citations that not relevant to the conversation. "
                     "Please include links from the citation content to the response message.")
     }]
-    logger.debug(json.dumps(message, indent=2))
     thread_ts = message.get("thread_ts", None) or message["ts"]
     ongoing_thread = "thread_ts" in message and "ts" in message
     if ongoing_thread:
@@ -149,6 +160,7 @@ def message_handler(message, say, logger):
             return
         else:
             add_history_to_messages(message, messages, thread_messages)
+            logger.info(json.dumps(messages, indent=2))
 
     # Add the user's message to the messages list
     messages.append({"role": "user", "content": message["text"]})
@@ -158,9 +170,14 @@ def message_handler(message, say, logger):
     parsed_response = parse_azure_openai_response(azure_openai_response)
     say(f"Hi there, <@{message['user']}>\n\n{parsed_response}", thread_ts=thread_ts)
 
-# Ignore any other event
+# Ignore any other message event
 @app.event("message")
 def event_handler(event, logger):
+    logger.debug(json.dumps(event, indent=2))
+
+# Ignore messages where the bot is mentioned
+@app.event("app_mention")
+def app_mention_handler(event, logger):
     logger.debug(json.dumps(event, indent=2))
 
 # Start your app
