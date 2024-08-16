@@ -23,6 +23,12 @@ azure_ai_search_key = os.getenv("AZURE_AI_SEARCH_KEY")
 azure_ai_search_index = os.getenv("AZURE_AI_SEARCH_INDEX")
 azure_ai_search_semantic_configuration = os.getenv("AZURE_AI_SEARCH_SEMANTIC_CONFIGURATION")
 
+# Azure AI Search parameters customization
+azure_ai_search_parameters = {
+    "in_scope": False,      # Set to True to only search within the scope of the index
+    "top_n_documents": 3,   # Number of documents to return in the search results
+}
+
 # Initialize Azure OpenAI client
 client = AzureOpenAI(
     azure_endpoint=azure_ai_endpoint,
@@ -60,11 +66,11 @@ def call_azure_openai(messages):
                             "text_vector"
                         ]
                     },
-                    "in_scope": True,
+                    "in_scope": azure_ai_search_parameters.get("in_scope"),
                     "role_information": "You are an AI assistant that helps people find information.",
                     "filter": None,
                     "strictness": 3,
-                    "top_n_documents": 3,
+                    "top_n_documents": azure_ai_search_parameters.get("top_n_documents"),
                     "authentication": {
                         "type": "api_key",
                         "key": f"{azure_ai_search_key}"
@@ -75,39 +81,21 @@ def call_azure_openai(messages):
     )
     return completion.to_dict()
 
-# Parse the response from Azure OpenAI and return content and citation url of the top 3 search results (dedubed)
+# Parse the response from Azure OpenAI and return content with citation hyperlinks of the top 3 search results
 def parse_azure_openai_response(azure_openai_response):
-    unavailable_response = "The requested information is not available in the retrieved data. Please try another query or topic."
     message = azure_openai_response.get("choices")[0].get("message")
     message_content = message.get("content")
     message_citations = message.get("context").get("citations")
-    if message_content is None or unavailable_response in message_content:
-        return unavailable_response
     
-    # Cleanup the message, extract the citation urls from the response, dedub them and construct the response message
-    
-    # # Clean up the message - remove from the message the [doc1][docn]] pattern at the end of the message
-    # message_content = message_content.rsplit("\n\n[doc", 1)[0] or message_content
-
-    # # Remove [doc1] through [docn] instances from anywhere in the message
-    # message_content = re.sub(r" \[doc\d+\]", "", message_content)
-
-    citation_urls = []
-    for citation in message_citations:
-        citation_urls.append(citation.get("url"))
-
-    # Dedub the citation urls
-    citation_urls = list(set(citation_urls))
-    
-    # Construct the response message with citation urls as a list of hyperlinks if available
+    # In the message content, replace the citation references ([doc1], [docn]) with hyperlinks of the url from the citations
+    citation_refs = re.findall(r"\[doc\d+\]", message_content)
+    for citation_ref in citation_refs:
+        citation_number = int(re.search(r"\d+", citation_ref).group())
+        citation_url = message_citations[citation_number - 1].get("url")
+        citation_hyperlink = f"<{citation_url}|[source-{citation_number}]>"
+        message_content = message_content.replace(citation_ref, citation_hyperlink)
+   
     response_message = f"{message_content}\n\n"
-    if len(citation_urls) > 0:
-        response_message += "*Sources*:\n"
-        citation_number = 0
-        for url in citation_urls:
-            citation_number += 1
-            response_message += f"{citation_number}. <{url}>\n"
-
     return response_message
 
 
@@ -129,9 +117,7 @@ def external_user_added(messages):
 def add_history_to_messages(incoming_message, messages, thread_messages):
     for thread_message in thread_messages:
         if thread_message.get("bot_id", None) is not None:
-            # Remove the sources from the bot's message that were added in the previous iterations
-            thread_message_text = re.sub(r"\n\n\*Sources\*:\n\d+\. <.+>\n", "", thread_message["text"])
-            messages.append({"role": "assistant", "content": thread_message_text})
+            messages.append({"role": "assistant", "content": thread_message["text"]})
         # If the message from the thread is same as incoming message (or another user), skip it
         elif incoming_message["ts"] != thread_message["ts"] and incoming_message["user"] == thread_messages[0]["user"]:
             messages.append({"role": "user", "content": thread_message["text"]}) 
