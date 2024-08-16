@@ -26,7 +26,8 @@ azure_ai_search_semantic_configuration = os.getenv("AZURE_AI_SEARCH_SEMANTIC_CON
 # Azure AI Search parameters customization
 azure_ai_search_parameters = {
     "in_scope": False,      # Set to True to only search within the scope of the index
-    "top_n_documents": 3,   # Number of documents to return in the search results
+    "strictness": 3,       # Set to 1 for the most relevant results, 3 for a balance between relevance and diversity
+    "top_n_documents": 5,   # Number of documents to return in the search results
 }
 
 # Initialize Azure OpenAI client
@@ -69,7 +70,7 @@ def call_azure_openai(messages):
                     "in_scope": azure_ai_search_parameters.get("in_scope"),
                     "role_information": "You are an AI assistant that helps people find information.",
                     "filter": None,
-                    "strictness": 3,
+                    "strictness": azure_ai_search_parameters.get("strictness"),
                     "top_n_documents": azure_ai_search_parameters.get("top_n_documents"),
                     "authentication": {
                         "type": "api_key",
@@ -81,7 +82,7 @@ def call_azure_openai(messages):
     )
     return completion.to_dict()
 
-# Parse the response from Azure OpenAI and return content with citation hyperlinks of the top 3 search results
+# Parse the response from Azure OpenAI and return content with citation hyperlinks
 def parse_azure_openai_response(azure_openai_response):
     message = azure_openai_response.get("choices")[0].get("message")
     message_content = message.get("content")
@@ -92,7 +93,7 @@ def parse_azure_openai_response(azure_openai_response):
     for citation_ref in citation_refs:
         citation_number = int(re.search(r"\d+", citation_ref).group())
         citation_url = message_citations[citation_number - 1].get("url")
-        citation_hyperlink = f"<{citation_url}|[source-{citation_number}]>"
+        citation_hyperlink = f"<{citation_url}|[ref]>"
         message_content = message_content.replace(citation_ref, citation_hyperlink)
    
     response_message = f"{message_content}\n\n"
@@ -133,7 +134,9 @@ def message_handler(message, say, logger):
     # Initialize the messages list for the conversation query with the system message
     messages = [{
         "role": "system",
-        "content": "Answer only questions related to the topic of the conversation. Do not provide information or citations that not relevant to the conversation. Please include links from the citation content to the response message."
+        "content": ("Answer only questions related to the topic of the conversation. "
+                    "Do not provide information or citations that not relevant to the conversation. "
+                    "Please include links from the citation content to the response message.")
     }]
     logger.debug(json.dumps(message, indent=2))
     thread_ts = message.get("thread_ts", None) or message["ts"]
