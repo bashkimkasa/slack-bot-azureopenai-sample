@@ -160,10 +160,10 @@ def message_handler(message, say, logger):
             return
         else:
             add_history_to_messages(message, messages, thread_messages)
-            logger.info(json.dumps(messages, indent=2))
 
-    # Add the user's message to the messages list
+    # Add the user's incomming message to the messages list
     messages.append({"role": "user", "content": message["text"]})
+    logger.debug(json.dumps(messages, indent=2))
 
     azure_openai_response = call_azure_openai(messages)
     logger.debug(json.dumps(azure_openai_response, indent=2))
