@@ -18,6 +18,15 @@ Please make sure that you have already created in Azure the following resources:
     2. Deploy a model for text-embedding (example: `text-embedding-ada-002`)
 2. An Azure (AI) Search service/resource
     1. Import and vectorize your data from above
+    2. `Optional Feature` - Add custom URLs to citations.
+        1. In order for citations to show an actual doc URL rather than the file path in the container follow the rest of the steps below.
+        2. To the files in the container from above add a custom metadata with key `url` and for value the desired URL.
+        3. To the `index` created from the import above add a custom field called `url` with same settings as the existing `title` field and save.
+        4. To the `skillset` created from the import above (JSON Definition), under the `indexProjections` section, add a new object for the url using the exact same object as the `title` simply replacing the word `title` with `url` anywhere in the new object and save.
+        5. In the indexer created from the import above: 
+            1. `Reset` the indexer
+            2. Update the indexer definition (JSON) clearing out any objects inside of the `fieldMappings`. Basically, it looks like this `"fieldMappings": []`.
+            3. `Save` and `Run` the indexer.
 
 
 ## App Settings And Configuration 
