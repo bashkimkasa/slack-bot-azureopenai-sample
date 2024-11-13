@@ -1,0 +1,8 @@
+destination:
+  container: support-k8s-ucc-platform
+  type: azure_storage
+sources:
+- pages:
+  - page_url: https://confluence.ops.expertcity.com/display/UCCDEVOPS/RTC+DevOps+-+Kubernetes+platform
+    recursive: true
+  type: confluence
