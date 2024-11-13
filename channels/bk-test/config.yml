@@ -1,15 +1,20 @@
 sources:
-  - type: confluence
-    pages:
-      - page_url: https://confluence.ops.expertcity.com/display/UCCDEVOPS/Service+-+VictoriaMetrics
-        recursive: true
+- type: confluence
+  pages:
+  - page_url: 
+      https://confluence.ops.expertcity.com/display/UCCDEVOPS/Service+-+VictoriaMetrics
+    recursive: true
 
-  - type: file
-    files:
-      - path: /channels/support-devops-victoria-metrics/files/p1725905832125709.txt
-        source_url: https://logmein.slack.com/archives/C03N4JMQBPH/p1725905832125709
-        title: "VictoriaMetrics - How environment label works"
+- type: file
+  files:
+  - path: /channels/support-devops-victoria-metrics/files/p1725905832125709.txt
+    source_url: https://logmein.slack.com/archives/C03N4JMQBPH/p1725905832125709
+    title: "VictoriaMetrics - How environment label works"
 
+  - path: ./channels/bk-test/files/1731425765.204969.txt
+    source_url: 
+      https://gotosandbox.slack.com/archives/C07SDDLEW9L/p1731425765204969?thread_ts=1731425765.204969&cid=C07SDDLEW9L
+    title: Conversation Thread - PLEASE UPDATE AS NEEDED
 destination:
   type: azure_storage
   container: support-devops-victoria-metrics
