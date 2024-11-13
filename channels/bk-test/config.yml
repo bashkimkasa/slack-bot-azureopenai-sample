@@ -4,6 +4,11 @@ sources:
   - page_url: 
       https://confluence.ops.expertcity.com/display/UCCDEVOPS/Service+-+VictoriaMetrics
     recursive: true
+- type: file
+  files:
+  - path: ./channels/bk-test/files/1731537867.351769.txt
+    source_url: https://gotosandbox.slack.com/archives/C07SDDLEW9L/p1731537867351769
+    title: Release Announcement for New AI Bot Version
 destination:
   type: azure_storage
   container: support-devops-victoria-metrics
