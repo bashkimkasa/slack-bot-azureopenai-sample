@@ -1,0 +1,18 @@
+sources:
+  - type: confluence
+    pages:
+      - page_url: https://confluence.ops.expertcity.com/display/UCCDEVOPS/RTC+DevOps+-+Kubernetes+platform
+        recursive: true
+
+  - type: file
+    files:
+      - path: /channels/support-k8s-ucc-platform/files/p1721974468617459.txt
+        source_url: https://logmein.slack.com/archives/C3Z7S96JF/p1721974468617459
+        title: "K8s UCC Platform - Removing alert rules in grafana9"
+      - path: /channels/support-k8s-ucc-platform/files/p1722513709150169.txt
+        source_url: https://logmein.slack.com/archives/C3Z7S96JF/p1722513709150169
+        title: "K8s UCC Platform - Logs for the Loadbalancers in front of the VideoGW (OCI)"
+
+destination:
+  type: azure_storage
+  container: support-k8s-ucc-platform
