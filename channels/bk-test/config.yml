@@ -1,0 +1,9 @@
+sources:
+- type: confluence
+  pages:
+  - page_url: 
+      https://confluence.ops.expertcity.com/display/UCCDEVOPS/Service+-+VictoriaMetrics
+    recursive: true
+destination:
+  type: azure_storage
+  container: support-devops-victoria-metrics
